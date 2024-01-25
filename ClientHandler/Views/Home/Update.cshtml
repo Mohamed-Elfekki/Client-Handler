@@ -1,0 +1,118 @@
+﻿@using ClientHandler.Models.Client
+@model UpdateVMRequest
+
+<div>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+            <strong>@TempData["Success"]</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+            <strong>@TempData["Error"]</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    <h2>حقل تحديث البيانات</h2>
+    <form method="post" asp-action="Update" asp-controller="Home" asp-route-nationalid="@Model.NationalId">
+        <div class="form-group">
+            <label asp-for="@Model.Name"></label>
+            <input asp-for="@Model.Name" type="text" id="name" name="name" required>
+            <span asp-validation-for="@Model.Name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.PhoneNumber"></label>
+            <input asp-for="@Model.PhoneNumber" id="phonenumber" name="phonenumber" required><br/>
+            <span asp-validation-for="@Model.PhoneNumber" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.Salary"></label>
+            <input asp-for="@Model.Salary" type="number" id="salary" name="salary" required><br/>
+            <span asp-validation-for="@Model.Salary" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="GovernorateId"></label>
+            <select asp-for="GovernorateId" asp-items="@(new SelectList(Model.governorates, "GovernorateId", "GovernorateName"))">
+                <option></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label asp-for="CityId"></label>
+            <select asp-for="CityId" asp-items="@(new SelectList(Model.citys, "CityId", "CityName"))">
+                <option></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label asp-for="VillageId"></label>
+            <select asp-for="VillageId" asp-items="@(new SelectList(Model.villages, "VillageId", "VillageName"))">
+                <option></option>
+            </select>
+        </div>
+        <button type="submit">تحديث</button>
+    </form>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#GovernorateId').on('change', function () {
+                var govId = $(this).val();
+                var cityList = $('#CityId');
+                var villageList = $('#VillageId');
+
+                cityList.empty();
+                cityList.append('<option></option>');
+                villageList.empty();
+                villageList.append('<option></option>');
+
+                if (govId !== '') {
+                    $.ajax({
+                        url: '/Home/GetAllCities?govId=' + govId,
+                        success: function (cities) {
+                            $.each(cities, function (i, city) {
+                                cityList.append($('<option></option>').attr('value', city.cityId).text(city.cityName));
+                            });
+                        },
+                        error: function () {
+                            alert(cities);
+                        }
+                    });
+                }
+
+            });
+
+        });
+
+        $(document).ready(function () {
+            $('#CityId').on('change', function () {
+                var citId = $(this).val();
+                var villageList = $('#VillageId');
+
+                villageList.empty();
+                villageList.append('<option></option>');
+
+                if (citId !== '') {
+                    $.ajax({
+                        url: '/Home/GetAllVillages?cityId=' + citId,
+                        success: function (villages) {
+                            console.log(villages);
+                            $.each(villages, function (i, village) {
+                                villageList.append($('<option></option>').attr('value', village.villageId).text(village.villageName));
+                            });
+                        },
+                        error: function () {
+                            alert(cities);
+                        }
+                    });
+                }
+
+            });
+
+        });
+    </script>
+}

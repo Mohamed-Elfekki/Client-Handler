@@ -1,0 +1,299 @@
+﻿//namespace ClientHandler.Models.Client
+//{
+//    public class UpdateVMRequest
+//    {
+//        [Required, Display(Name = ": الإسم")]
+//        public string Name { get; set; } = null!;
+
+//        public string NationalId { get; set; } = null!;
+
+//        [Required(ErrorMessage = "يجب أن يتكون رقهم الهاتف من 11 رقم، يبدأ ب 01"), Phone, MaxLength(11)]
+//        [Display(Name = ": رقم الهاتف")]
+//        public string PhoneNumber { get; set; } = null!;
+//        [Required(ErrorMessage = "يجب أن يكون المرتب ما بين خمسة ألالاف و عشرون ألف"), Range(5000, 20000)]
+//        [Display(Name = ": المرتب")]
+//        public decimal Salary { get; set; }
+//        public int CityId { get; set; }
+//        public int VillageId { get; set; }
+//    }
+//}
+
+
+
+
+
+//[Authorize(Roles = "Admin,Employee")]
+//[HttpGet]
+//public async Task<IActionResult> Update(string nationalId)
+//{
+//    var result = await _generalService.GetClientByIdAsync(nationalId);
+//    var govers = await _generalService.GetAllGovernoratesAsync();
+//    if (result != null || govers.Count() > 0)
+//    {
+//        UpdateVMRequest updateVMRequest = new UpdateVMRequest
+//        {
+//            Name = result.Name,
+//            Salary = result.Salary,
+//            PhoneNumber = result.PhoneNumber,
+//            NationalId = result.NationalId
+//        };
+
+//        GenericViewModel viewModel = new GenericViewModel
+//        {
+//            UClient = updateVMRequest,
+//            governorates = govers
+//        };
+//        return View(viewModel);
+//    }
+//    TempData["Failed"] = "فشلت عملية تحديث البيانات ";
+//    return RedirectToAction("Main", "Home");
+//}
+
+//[Authorize(Roles = "Admin,Employee")]
+//[HttpPost]
+//public async Task<IActionResult> Update(string nationalId, UpdateVMRequest model)
+//{
+//    var result = await _generalService.UpdateClientByIdAsync(nationalId, model);
+//    if (result != null)
+//    {
+//        TempData["Success"] = "تم تحديث البيانات بنجاح";
+//        return RedirectToAction("Main", "Home", result);
+//    }
+//    TempData["Error"] = "فشلت عملية التحديث";
+//    return View();
+//}
+
+
+
+//[AllowAnonymous]
+//[HttpGet]
+//public async Task<IActionResult> Index()
+//{
+//    var result = await _generalService.GetAllGovernoratesAsync();
+//    if (result != null)
+//    {
+//        GenericViewModel genericVM = new GenericViewModel
+//        {
+//            governorates = result
+//        };
+//        return View(genericVM);
+//    }
+//    return View();
+//}
+
+//[AllowAnonymous]
+//[HttpPost]
+//public async Task<IActionResult> Index(ClientVMRequest model)
+//{
+//    var govers = await _generalService.GetAllGovernoratesAsync();
+//    GenericViewModel generic = new GenericViewModel();
+//    if (ModelState.IsValid)
+//    {
+//        var result = await _generalService.CreateNewClientAsync(model);
+//        if (result != null)
+//        {
+
+//            TempData["Success"] = "تمت إضافة بياناتك بنجاح";
+
+//            loginVMRequest loginVM = new loginVMRequest
+//            {
+//                UserName = result.NationalId,
+//                Password = model.Password
+//            };
+
+//            var user = await _identityService.Login(loginVM);
+//            if (result != null)
+//            {
+//                return RedirectToAction("Main");
+//            }
+//        }
+//        else
+//        {
+//            TempData["Error"] = "لم تمت إضافة البيانات بنجاح، حاول مجددا";
+//            generic = new GenericViewModel
+//            {
+//                Client = model,
+//                governorates = govers
+//            };
+//            return View(model);
+//        }
+//    }
+//    generic = new GenericViewModel
+//    {
+//        Client = model,
+//        governorates = govers
+//    };
+//    return View(generic);
+//}
+
+
+
+
+@* @model ClientHandler.Models.GenericViewModel
+
+<div>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+            <strong>@TempData["Success"]</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+            <strong>@TempData["Error"]</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    <h2>حقل تحديث البيانات</h2>
+    <form method="post" asp-action="Update" asp-controller="Home" asp-route-nationalid="@Model.UClient.NationalId">
+        <div class="form-group">
+            <label asp-for="@Model.UClient.Name"></label>
+            <input asp-for="@Model.UClient.Name" type="text" id="name" name="name" required>
+            <span asp-validation-for="@Model.UClient.Name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.UClient.PhoneNumber"></label>
+            <input asp-for="@Model.UClient.PhoneNumber" id="phonenumber" name="phonenumber" required>
+            <span asp-validation-for="@Model.UClient.PhoneNumber" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.UClient.Salary"></label>
+            <input asp-for="@Model.UClient.Salary" type="number" id="salary" name="salary" required>
+            <span asp-validation-for="@Model.UClient.Salary" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="GovernorateId"></label>
+            <select asp-for="GovernorateId" asp-items="@(new SelectList(Model.governorates, "GovernorateId", "GovernorateName"))">
+                <option></option>
+            </select>
+            <span asp-validation-for="@Model.GovernorateId" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="CityId"></label>
+            <select asp-for="CityId" asp-items="@(new SelectList(Model.citys, "CityId", "CityName"))">
+                <option></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label asp-for="VillageId"></label>
+            <select asp-for="VillageId" asp-items="@(new SelectList(Model.villages, "VillageId", "VillageName"))">
+                <option></option>
+            </select>
+        </div>
+        <button type="submit">تحديث</button>
+    </form>
+</div> *@
+
+
+
+
+@* @model ClientHandler.Models.GenericViewModel
+
+
+<div>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+            <strong>@TempData["Success"]</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+            <strong>@TempData["Error"]</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <h2 style="font-weight:bolder">حقل إدخال البيانات</h2>
+    <form method="post" asp-action="Index" asp-controller="Home">
+        <div class="form-group">
+            <label asp-for="@Model.Client.Name"></label>
+            <input asp-for="@Model.Client.Name" type="text" id="name" name="name" required>
+            <span asp-validation-for="@Model.Client.Name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.Client.NationalId"></label>
+            <input asp-for="@Model.Client.NationalId" id="nationalid" name="nationalid" required>
+            <span asp-validation-for="@Model.Client.NationalId" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.Client.PhoneNumber"></label>
+            <input asp-for="@Model.Client.PhoneNumber" id="phonenumber" name="phonenumber" required>
+            <span asp-validation-for="@Model.Client.PhoneNumber" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.Client.Salary"></label>
+            <input asp-for="@Model.Client.Salary" type="number" id="salary" name="salary" required>
+            <span asp-validation-for="@Model.Client.Salary" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="GovernorateId"></label>
+            <select asp-for="GovernorateId" asp-items="@(new SelectList(Model.governorates, "GovernorateId", "GovernorateName"))">
+                <option></option>
+            </select>
+            <span asp-validation-for="@Model.GovernorateId" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="CityId"></label>
+            <select asp-for="CityId" asp-items="@(new SelectList(Model.citys, "CityId", "CityName"))">
+                <option></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label asp-for="VillageId"></label>
+            <select asp-for="VillageId" asp-items="@(new SelectList(Model.villages, "VillageId", "VillageName"))">
+                <option></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.Client.Password" class="text-danger" style="font-weight:bolder"></label>
+            <input asp-for="@Model.Client.Password" type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-lg">تسجيل</button>
+    </form>
+</div> *@
+
+
+
+
+
+
+
+using ClientHandler.Models.Client;
+using ClientHandler.Models.Country;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.ComponentModel.DataAnnotations;
+
+namespace ClientHandler.Models
+{
+    public class GenericViewModel
+    {
+        public UpdateVMRequest? UClient { get; set; }
+
+        [Required]
+        public ClientVMRequest Client { get; set; } = null!;
+
+        [Display(Name = ": المحافظة")]
+        [Required(ErrorMessage = "الرجاء إدخال المحافظة")]
+        public int GovernorateId { get; set; }
+
+        public IEnumerable<GovernorateVMResponse>? governorates { get; set; }
+
+        [Display(Name = ": المدينة")]
+        public int CityId { get; set; }
+
+        public IEnumerable<CityVMResponse>? citys { get; set; } = new List<CityVMResponse>();
+
+        [Display(Name = ": الحي، القسم أو القرية")]
+        public int VillageId { get; set; }
+
+        public IEnumerable<VillageVMResponse>? villages { get; set; } = new List<VillageVMResponse>();
+
+
+    }
+}
+

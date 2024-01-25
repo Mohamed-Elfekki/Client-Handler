@@ -1,0 +1,88 @@
+﻿@using ClientHandler.Models.Client
+@model IList<ClientVMResponse>
+
+
+
+
+<div class="container" style="padding-top:30px">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+            <strong>@TempData["Success"]</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+            <strong>@TempData["Error"]</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div style="width:stretch; display:flex; justify-content:space-between" >
+        @if (User.Identity.IsAuthenticated && (User.IsInRole("Admin")))
+        {
+        <a asp-action="ExportToExcel" asp-controller="Home" class="btn btn-lg btn-secondary mb-3">إصدار تقرير</a>
+        }
+        <a asp-action="LogOut" asp-controller="Identity" class="btn btn-lg btn-outline-danger mb-3">خروج</a>
+    </div>
+
+
+    @if (User.Identity.IsAuthenticated && (User.IsInRole("Admin")))
+    {
+        <form asp-action="Search" asp-controller="Home" class="d-flex" style="width:500px; margin-bottom:10px;">
+            <input type="search" name="search" placeholder="إبحث عن عميل" aria-label="Search" class="form-control me-2" style="font-size: 1em;font-style:oblique; font-weight:bolder ">
+            <button type="submit" class="btn btn-outline-secondary" style="font-size: 1em; font-weight:bolder">بحث</button>
+            <a asp-action="Main" asp-controller="Home" class="btn btn-outline-primary" style="font-size: 1em; font-weight:bolder;margin-left:20px;" >الكل</a>
+        </form>
+    }
+
+    <table class="table table-striped table-hover text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>الإسم</th>
+                <th>الرقم القومي</th>
+                <th>رقم الهاتف</th>
+                <th>المرتب</th>
+                <th>المحافظة</th>
+                <th>المدينة</th>
+                <th>الحي، القسم أو القرية</th>
+                @if (User.Identity.IsAuthenticated && ((User.IsInRole("Employee") || (User.IsInRole("Admin")))))
+                {
+                    <th>الإجراءات</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+            <tr>
+
+                    <td>@item.Name</td>
+                    <td>@item.NationalId</td>
+                    <td>@item.PhoneNumber</td>
+                    <td>@Convert.ToDouble(item.Salary)</td>
+                    <td>@item.Governorate</td>
+                    <td>@item.City</td>
+                    <td>@item.Village</td>
+                    @if (User.Identity.IsAuthenticated && ((User.IsInRole("Employee") || (User.IsInRole("Admin")))))
+                    {
+                        <td>
+                            @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                            {
+                                <a asp-action="Delete" asp-controller="Home" asp-route-nationalid="@item.NationalId" class="btn btn-sm btn-danger">حذف</a>
+                            }
+                            @if (User.Identity.IsAuthenticated && ((User.IsInRole("Employee") || (User.IsInRole("Admin")))))
+                            {
+                                <a asp-action="Update" asp-controller="Home" asp-route-nationalid="@item.NationalId" class="btn btn-sm btn-primary">تحديث</a>
+                            }
+                        </td>
+                    }
+
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
